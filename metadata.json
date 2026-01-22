@@ -1,0 +1,7 @@
+{
+  "name": "Foodlytic AI - Food Safety Analyzer",
+  "description": "An AI-powered food safety tool that analyzes ingredient labels to identify additives, preservatives, and health risks, providing a clear safety score and healthy alternatives.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
