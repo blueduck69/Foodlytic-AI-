@@ -1,24 +1,29 @@
 
 import React, { useState } from 'react';
-import { ShieldCheck, HeartPulse, ScanLine, Type, History, AlertCircle, Leaf } from 'lucide-react';
+import { ShieldCheck, HeartPulse, ScanLine, Type, History, AlertCircle, Leaf, Globe, ChevronDown } from 'lucide-react';
 import Scanner from './components/Scanner';
 import ManualInput from './components/ManualInput';
 import Results from './components/Results';
 import { analyzeFoodIngredients } from './services/geminiService';
-import { FoodAnalysis } from './types';
+import { FoodAnalysis, LanguageCode, SUPPORTED_LANGUAGES } from './types';
+import { uiTranslations } from './translations';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'scan' | 'manual'>('scan');
+  const [language, setLanguage] = useState<LanguageCode>('en');
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<FoodAnalysis | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isLangOpen, setIsLangOpen] = useState(false);
+
+  const t = uiTranslations[language];
 
   const handleAnalysis = async (input: string | { data: string; mimeType: string }) => {
     setIsLoading(true);
     setError(null);
     try {
       const isImage = typeof input !== 'string';
-      const data = await analyzeFoodIngredients(input, isImage);
+      const data = await analyzeFoodIngredients(input, isImage, language);
       setResult(data);
     } catch (err: any) {
       console.error(err);
@@ -28,25 +33,61 @@ const App: React.FC = () => {
     }
   };
 
+  const currentLang = SUPPORTED_LANGUAGES.find(l => l.code === language);
+
   return (
     <div className="min-h-screen pb-12 font-sans text-gray-900 bg-gray-50">
       {/* Navbar */}
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 group cursor-pointer">
+          <div className="flex items-center gap-2 group cursor-pointer" onClick={() => { setResult(null); setError(null); }}>
             <div className="p-2 bg-green-600 text-white rounded-xl shadow-lg group-hover:rotate-12 transition-transform">
               <ShieldCheck size={24} />
             </div>
-            <h1 className="text-2xl font-black tracking-tight text-gray-800">
+            <h1 className="text-2xl font-black tracking-tight text-gray-800 hidden sm:block">
               Food<span className="text-green-600">lytic</span> AI
             </h1>
           </div>
-          <div className="hidden md:flex items-center gap-6 text-sm font-semibold text-gray-500">
-            <a href="#" className="hover:text-green-600 transition-colors">How it works</a>
-            <a href="#" className="hover:text-green-600 transition-colors">Safety Standards</a>
-            <button className="bg-green-50 text-green-700 px-4 py-2 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-2">
-              <History size={16} /> History
-            </button>
+
+          <div className="flex items-center gap-2 sm:gap-6">
+            <div className="relative">
+              <button 
+                onClick={() => setIsLangOpen(!isLangOpen)}
+                className="flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-bold text-gray-700 transition-colors"
+              >
+                <Globe size={18} className="text-green-600" />
+                <span className="hidden xs:inline">{currentLang?.nativeName}</span>
+                <ChevronDown size={14} className={`transition-transform duration-200 ${isLangOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {isLangOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[60] animate-in fade-in zoom-in duration-200">
+                  {SUPPORTED_LANGUAGES.map((lang) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => {
+                        setLanguage(lang.code);
+                        setIsLangOpen(false);
+                        if (result) {
+                           // Option: Re-analyze or just keep existing until next scan
+                        }
+                      }}
+                      className={`w-full text-left px-4 py-3 text-sm font-semibold hover:bg-green-50 flex items-center justify-between ${language === lang.code ? 'text-green-700 bg-green-50' : 'text-gray-600'}`}
+                    >
+                      <span>{lang.nativeName}</span>
+                      {language === lang.code && <div className="w-1.5 h-1.5 bg-green-600 rounded-full" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="hidden md:flex items-center gap-6 text-sm font-semibold text-gray-500">
+              <a href="#" className="hover:text-green-600 transition-colors">{t.howItWorks}</a>
+              <button className="bg-green-50 text-green-700 px-4 py-2 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-2">
+                <History size={16} /> {t.history}
+              </button>
+            </div>
           </div>
         </div>
       </nav>
@@ -55,10 +96,10 @@ const App: React.FC = () => {
         {/* Header Section */}
         <div className="text-center mb-12">
           <h2 className="text-4xl font-extrabold text-gray-900 mb-4 tracking-tight leading-tight">
-            Know exactly what you're eating.
+            {t.heroTitle}
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto font-medium">
-            Instantly decode complicated food labels. Our AI identifies hidden chemicals, preservatives, and potential health risks.
+            {t.heroSubtitle}
           </p>
         </div>
 
@@ -70,13 +111,13 @@ const App: React.FC = () => {
                 onClick={() => setActiveTab('scan')}
                 className={`px-6 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${activeTab === 'scan' ? 'bg-white shadow-md text-green-700' : 'text-gray-500 hover:bg-gray-300/50'}`}
               >
-                <ScanLine size={18} /> Label Scanner
+                <ScanLine size={18} /> {t.scanTab}
               </button>
               <button 
                 onClick={() => setActiveTab('manual')}
                 className={`px-6 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${activeTab === 'manual' ? 'bg-white shadow-md text-green-700' : 'text-gray-500 hover:bg-gray-300/50'}`}
               >
-                <Type size={18} /> Manual Entry
+                <Type size={18} /> {t.manualTab}
               </button>
             </div>
           </div>
@@ -96,9 +137,9 @@ const App: React.FC = () => {
           {!result ? (
             <div className="max-w-2xl mx-auto">
               {activeTab === 'scan' ? (
-                <Scanner onScan={handleAnalysis} isLoading={isLoading} />
+                <Scanner onScan={handleAnalysis} isLoading={isLoading} language={language} />
               ) : (
-                <ManualInput onAnalyze={handleAnalysis} isLoading={isLoading} />
+                <ManualInput onAnalyze={handleAnalysis} isLoading={isLoading} language={language} />
               )}
             </div>
           ) : (
@@ -108,10 +149,10 @@ const App: React.FC = () => {
                   onClick={() => { setResult(null); setError(null); }}
                   className="bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-2 px-6 rounded-full transition-colors flex items-center gap-2 shadow-sm"
                 >
-                  <ScanLine size={16} /> Scan Another Product
+                  <ScanLine size={16} /> {t.anotherProduct}
                 </button>
               </div>
-              <Results data={result} />
+              <Results data={result} language={language} />
             </>
           )}
         </div>
@@ -123,22 +164,22 @@ const App: React.FC = () => {
               <div className="w-10 h-10 bg-green-100 text-green-600 rounded-lg flex items-center justify-center">
                 <HeartPulse size={20} />
               </div>
-              <h4 className="font-bold">Identify Harmful Dyes</h4>
-              <p className="text-sm text-gray-500 leading-relaxed">Find artificial colors linked to hyperactivity in children like E102, E129, and more.</p>
+              <h4 className="font-bold">{t.dyesTitle}</h4>
+              <p className="text-sm text-gray-500 leading-relaxed">{t.dyesDesc}</p>
             </div>
             <div className="p-6 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-3">
               <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">
                 <ShieldCheck size={20} />
               </div>
-              <h4 className="font-bold">Check Preservatives</h4>
-              <p className="text-sm text-gray-500 leading-relaxed">Understand the role of Sodium Benzoate, Nitrates, and BHA in your favorite snacks.</p>
+              <h4 className="font-bold">{t.preservativesTitle}</h4>
+              <p className="text-sm text-gray-500 leading-relaxed">{t.preservativesDesc}</p>
             </div>
             <div className="p-6 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-3">
               <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center">
                 <Leaf size={20} />
               </div>
-              <h4 className="font-bold">Better Alternatives</h4>
-              <p className="text-sm text-gray-500 leading-relaxed">Get personalized recommendations for cleaner, whole-food options with fewer additives.</p>
+              <h4 className="font-bold">{t.alternativesTitle}</h4>
+              <p className="text-sm text-gray-500 leading-relaxed">{t.alternativesDesc}</p>
             </div>
           </div>
         )}
@@ -152,7 +193,7 @@ const App: React.FC = () => {
              <span className="font-bold text-gray-400">Foodlytic AI v1.0</span>
           </div>
           <p className="text-xs text-gray-400 font-medium">
-            This tool is for educational purposes only. Always consult a healthcare professional for dietary advice or medical concerns. Safety data derived from WHO, FDA, and EFSA guidelines.
+            {t.disclaimer}
           </p>
         </div>
       </footer>

@@ -11,6 +11,24 @@ export enum HealthLabel {
   UNHEALTHY = 'Unhealthy'
 }
 
+export type LanguageCode = 'en' | 'hi' | 'or' | 'bn' | 'ta' | 'te' | 'mr';
+
+export interface Language {
+  code: LanguageCode;
+  name: string;
+  nativeName: string;
+}
+
+export const SUPPORTED_LANGUAGES: Language[] = [
+  { code: 'en', name: 'English', nativeName: 'English' },
+  { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी' },
+  { code: 'or', name: 'Odia', nativeName: 'ଓଡ଼ିଆ' },
+  { code: 'bn', name: 'Bengali', nativeName: 'বাংলা' },
+  { code: 'ta', name: 'Tamil', nativeName: 'தமிழ்' },
+  { code: 'te', name: 'Telugu', nativeName: 'తెలుగు' },
+  { code: 'mr', name: 'Marathi', nativeName: 'मराठी' },
+];
+
 export interface Ingredient {
   name: string;
   code?: string;

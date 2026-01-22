@@ -10,17 +10,20 @@ import {
   HeartPulse, 
   ChefHat, 
   CheckCircle2, 
-  XCircle, 
   AlertTriangle,
   Sparkles
 } from 'lucide-react';
-import { FoodAnalysis, HealthLabel, SafetyLevel } from '../types';
+import { FoodAnalysis, LanguageCode, SafetyLevel } from '../types';
+import { uiTranslations } from '../translations';
 
 interface ResultsProps {
   data: FoodAnalysis;
+  language: LanguageCode;
 }
 
-const Results: React.FC<ResultsProps> = ({ data }) => {
+const Results: React.FC<ResultsProps> = ({ data, language }) => {
+  const t = uiTranslations[language];
+
   const getScoreColor = (score: number) => {
     if (score >= 7) return 'text-green-600 border-green-200 bg-green-50';
     if (score >= 4) return 'text-yellow-600 border-yellow-200 bg-yellow-50';
@@ -66,11 +69,11 @@ const Results: React.FC<ResultsProps> = ({ data }) => {
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span className="text-4xl font-bold">{data.score}</span>
-            <span className="text-xs uppercase tracking-widest font-semibold opacity-70">Score</span>
+            <span className="text-xs uppercase tracking-widest font-semibold opacity-70">{t.score}</span>
           </div>
         </div>
         <div className="flex-1 text-center md:text-left">
-          <h2 className="text-2xl font-bold mb-2">Verdict: {data.label}</h2>
+          <h2 className="text-2xl font-bold mb-2">{t.verdict}: {data.label}</h2>
           <p className="text-lg opacity-90 leading-relaxed font-medium">
             {data.verdict}
           </p>
@@ -79,10 +82,9 @@ const Results: React.FC<ResultsProps> = ({ data }) => {
 
       {/* Grid Content */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Detected Ingredients */}
         <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
           <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <Info className="text-blue-500" /> Detected Ingredients
+            <Info className="text-blue-500" /> {t.detectedIngredients}
           </h3>
           <div className="flex flex-wrap gap-2">
             {data.ingredients.map((ing, idx) => (
@@ -95,30 +97,29 @@ const Results: React.FC<ResultsProps> = ({ data }) => {
           </div>
         </div>
 
-        {/* Health Insights */}
         <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
           <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <HeartPulse className="text-rose-500" /> Health Insights
+            <HeartPulse className="text-rose-500" /> {t.healthInsights}
           </h3>
           <ul className="space-y-4">
             <li className="flex gap-3">
               <div className="p-2 bg-pink-50 rounded-lg text-pink-600 h-fit"><Baby size={18} /></div>
               <div>
-                <p className="text-xs font-bold text-gray-400 uppercase">For Children</p>
+                <p className="text-xs font-bold text-gray-400 uppercase">{t.forChildren}</p>
                 <p className="text-sm font-medium text-gray-700">{data.healthInsights.childrenFriendly}</p>
               </div>
             </li>
             <li className="flex gap-3">
               <div className="p-2 bg-orange-50 rounded-lg text-orange-600 h-fit"><Leaf size={18} /></div>
               <div>
-                <p className="text-xs font-bold text-gray-400 uppercase">Pregnancy Safety</p>
+                <p className="text-xs font-bold text-gray-400 uppercase">{t.pregnancySafety}</p>
                 <p className="text-sm font-medium text-gray-700">{data.healthInsights.pregnancySafe}</p>
               </div>
             </li>
             <li className="flex gap-3">
               <div className="p-2 bg-blue-50 rounded-lg text-blue-600 h-fit"><AlertTriangle size={18} /></div>
               <div>
-                <p className="text-xs font-bold text-gray-400 uppercase">Allergy Warnings</p>
+                <p className="text-xs font-bold text-gray-400 uppercase">{t.allergyWarnings}</p>
                 <p className="text-sm font-medium text-gray-700">{data.healthInsights.allergies}</p>
               </div>
             </li>
@@ -126,10 +127,9 @@ const Results: React.FC<ResultsProps> = ({ data }) => {
         </div>
       </div>
 
-      {/* Additives Deep Dive */}
       <div className="bg-white p-8 rounded-2xl shadow-md border border-gray-100">
         <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-          <AlertTriangle className="text-yellow-500" /> Additive Safety Breakdown
+          <AlertTriangle className="text-yellow-500" /> {t.safetyBreakdown}
         </h3>
         <div className="space-y-6">
           {data.additives.length > 0 ? data.additives.map((add, idx) => (
@@ -145,10 +145,10 @@ const Results: React.FC<ResultsProps> = ({ data }) => {
                   </span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 text-sm">
-                  <div><span className="text-gray-400 font-semibold mr-1">Purpose:</span> {add.purpose}</div>
-                  <div><span className="text-gray-400 font-semibold mr-1">Regulator:</span> {add.regulatoryStatus}</div>
+                  <div><span className="text-gray-400 font-semibold mr-1">{t.purpose}:</span> {add.purpose}</div>
+                  <div><span className="text-gray-400 font-semibold mr-1">{t.regulator}:</span> {add.regulatoryStatus}</div>
                   <div className="md:col-span-2 mt-1 italic text-gray-600">
-                    <span className="text-gray-400 font-semibold not-italic mr-1">Impact:</span> {add.sideEffects}
+                    <span className="text-gray-400 font-semibold not-italic mr-1">{t.impact}:</span> {add.sideEffects}
                   </div>
                 </div>
               </div>
@@ -159,12 +159,11 @@ const Results: React.FC<ResultsProps> = ({ data }) => {
         </div>
       </div>
 
-      {/* Alternatives */}
       <div className="bg-green-700 p-8 rounded-3xl text-white shadow-xl relative overflow-hidden">
         <ChefHat className="absolute -right-4 -bottom-4 opacity-10 w-48 h-48" />
         <div className="relative z-10">
           <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <Sparkles size={24} /> Healthier Alternatives
+            <Sparkles size={24} /> {t.healthierAlternatives}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {data.alternatives.map((alt, idx) => (

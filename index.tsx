@@ -1,4 +1,8 @@
-import './index.css'
+
+// Global shim for process.env must be at the absolute top
+if (typeof (window as any).process === 'undefined') {
+  (window as any).process = { env: {} };
+}
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';

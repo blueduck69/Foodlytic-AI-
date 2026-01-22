@@ -1,14 +1,18 @@
 
 import React, { useState } from 'react';
 import { Send, FileText } from 'lucide-react';
+import { LanguageCode } from '../types';
+import { uiTranslations } from '../translations';
 
 interface ManualInputProps {
   onAnalyze: (text: string) => void;
   isLoading: boolean;
+  language: LanguageCode;
 }
 
-const ManualInput: React.FC<ManualInputProps> = ({ onAnalyze, isLoading }) => {
+const ManualInput: React.FC<ManualInputProps> = ({ onAnalyze, isLoading, language }) => {
   const [text, setText] = useState('');
+  const t = uiTranslations[language];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,12 +27,12 @@ const ManualInput: React.FC<ManualInputProps> = ({ onAnalyze, isLoading }) => {
         <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
           <FileText size={20} />
         </div>
-        <h3 className="text-lg font-bold text-gray-800">Manual Ingredient List</h3>
+        <h3 className="text-lg font-bold text-gray-800">{t.manualTitle}</h3>
       </div>
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
-        placeholder="Paste ingredients here... (e.g., Sugar, Wheat Flour, Sodium Benzoate, Yellow 5...)"
+        placeholder={t.placeholder}
         className="w-full h-40 p-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all resize-none text-sm leading-relaxed"
       />
       <button
@@ -36,7 +40,7 @@ const ManualInput: React.FC<ManualInputProps> = ({ onAnalyze, isLoading }) => {
         className="mt-4 w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2"
       >
         <Send size={18} />
-        {isLoading ? 'Analyzing...' : 'Analyze Ingredients'}
+        {isLoading ? t.scanning.replace('...', '') : t.analyzeBtn}
       </button>
     </form>
   );
