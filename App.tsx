@@ -26,8 +26,10 @@ const App: React.FC = () => {
       const data = await analyzeFoodIngredients(input, isImage, language);
       setResult(data);
     } catch (err: any) {
-      console.error(err);
-      setError("Analysis failed. Please ensure the text is clear or try manual entry.");
+      console.error("App Analysis Error:", err);
+      // Show more specific errors if possible
+      const errorMessage = err.message || "Analysis failed. Please ensure the label is clear and well-lit, or try manual entry.";
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -68,9 +70,6 @@ const App: React.FC = () => {
                       onClick={() => {
                         setLanguage(lang.code);
                         setIsLangOpen(false);
-                        if (result) {
-                           // Option: Re-analyze or just keep existing until next scan
-                        }
                       }}
                       className={`w-full text-left px-4 py-3 text-sm font-semibold hover:bg-green-50 flex items-center justify-between ${language === lang.code ? 'text-green-700 bg-green-50' : 'text-gray-600'}`}
                     >
@@ -125,10 +124,13 @@ const App: React.FC = () => {
 
         {/* Error State */}
         {error && (
-          <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-4 text-red-700 animate-in fade-in zoom-in duration-300">
-            <AlertCircle className="flex-shrink-0" />
-            <p className="font-semibold">{error}</p>
-            <button onClick={() => setError(null)} className="ml-auto text-xs underline font-bold uppercase tracking-widest">Dismiss</button>
+          <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-4 text-red-700 animate-in fade-in zoom-in duration-300">
+            <AlertCircle className="flex-shrink-0 mt-1" />
+            <div className="flex-1">
+              <p className="font-bold text-sm uppercase mb-1 tracking-wider">Analysis Error</p>
+              <p className="font-medium text-sm leading-relaxed">{error}</p>
+            </div>
+            <button onClick={() => setError(null)} className="ml-auto text-xs underline font-bold uppercase tracking-widest hover:text-red-900">Dismiss</button>
           </div>
         )}
 
@@ -157,7 +159,7 @@ const App: React.FC = () => {
           )}
         </div>
 
-        {/* Footer info blocks if no results yet */}
+        {/* Info Blocks */}
         {!result && !isLoading && (
           <div className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="p-6 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-3">
@@ -185,7 +187,6 @@ const App: React.FC = () => {
         )}
       </main>
 
-      {/* Floating Support Info */}
       <footer className="mt-32 border-t border-gray-200 py-12 bg-white">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
